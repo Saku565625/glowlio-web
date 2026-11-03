@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ত্বকের যত্ন - প্রিমিয়াম স্কিনকেয়ার শপ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400&family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --ambient-glow: rgba(255, 255, 255, 0.15); --transition-curve: cubic-bezier(0.22, 1, 0.36, 1); }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Hind Siliguri', sans-serif; user-select:none; -webkit-user-select:none; }
+        body { background-color:#07090b; min-height:100vh; display:flex; align-items:center; justify-content:center; overflow:hidden; color:#fff; }
+        .main-frame { position:relative; width:96vw; height:94vh; border-radius:32px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.8), inset 0 0 1px 1px rgba(255,255,255,0.12); background:radial-gradient(circle at 55% 45%, #9e4368 0%, #3a1022 60%, #100308 100%); transition:background 1.2s var(--transition-curve); }
+        .ambient-backlight { position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:650px; height:650px; background:radial-gradient(circle, var(--ambient-glow) 0%, rgba(0,0,0,0) 70%); filter:blur(80px); pointer-events:none; z-index:1; transition:all 1.2s ease; }
+        .stage-area { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; perspective:1200px; z-index:2; cursor:grab; }
+        .stage-area:active { cursor:grabbing; }
+        .product-3d-wrapper { position:relative; width:380px; height:560px; display:flex; align-items:center; justify-content:center; transform-style:preserve-3d; transition:transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1); pointer-events:none; }
+        .real-product-img { max-width:92%; max-height:92%; object-fit:contain; filter:drop-shadow(0 20px 30px rgba(0,0,0,0.55)); animation:cosrxFloating 5s ease-in-out infinite; pointer-events:auto; will-change:transform, filter; }
+        @keyframes cosrxFloating { 0%, 100% { transform:translateY(0px) rotate(0deg); } 50% { transform:translateY(-20px) rotate(1.2deg); } }
+        .ground-shadow-wrap { position:absolute; bottom:35px; width:290px; height:40px; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+        .ambient-shadow { position:absolute; width:100%; height:100%; background:radial-gradient(ellipse at center, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 75%); filter:blur(14px); animation:shadowScale 5s ease-in-out infinite; }
+        .contact-shadow { position:absolute; width:55%; height:40%; background:radial-gradient(ellipse at center, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 65%); filter:blur(4px); animation:shadowScaleContact 5s ease-in-out infinite; }
+        @keyframes shadowScale { 0%, 100% { transform:scale(1); opacity:0.75; } 50% { transform:scale(0.85); opacity:0.45; } }
+        @keyframes shadowScaleContact { 0%, 100% { transform:scale(1); opacity:0.95; } 50% { transform:scale(0.75); opacity:0.6; } }
+        .ui-layer { position:absolute; inset:0; z-index:10; pointer-events:none; display:flex; flex-direction:column; justify-content:space-between; padding:35px 55px; }
+        .interactive { pointer-events:auto; }
+        header { display:flex; justify-content:space-between; align-items:center; gap:20px; }
+        .brand-logo { font-size:24px; font-weight:700; letter-spacing:0.8px; display:flex; align-items:center; gap:10px; }
+        .brand-logo span { font-family:'Cormorant Garamond', serif; font-style:italic; font-size:26px; opacity:0.88; }
+        .header-actions { display:flex; align-items:center; gap:14px; }
+        .search-container { position:relative; width:280px; }
+        .search-input { width:100%; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); border-radius:25px; padding:9px 18px 9px 38px; color:#fff; font-size:14px; outline:none; backdrop-filter:blur(10px); transition:0.3s; }
+        .search-input:focus { background:rgba(255,255,255,0.22); border-color:#fff; }
+        .search-input::placeholder { color:rgba(255,255,255,0.65); }
+        .search-icon { position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:13px; }
+        .search-results { position:absolute; top:48px; left:0; width:100%; background:rgba(255,255,255,0.98); border-radius:14px; list-style:none; max-height:220px; overflow-y:auto; box-shadow:0 10px 30px rgba(0,0,0,0.3); display:none; z-index:50; }
+        .search-results li { padding:10px 15px; color:#222; font-size:13.5px; cursor:pointer; border-bottom:1px solid #f1f1f1; transition:0.2s; }
+        .search-results li:hover { background:#fff0f5; color:#b83b6e; }
+        .btn-panel { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); color:white; padding:9px 18px; border-radius:30px; font-size:14px; cursor:pointer; backdrop-filter:blur(8px); transition:0.3s; display:flex; align-items:center; gap:8px; }
+        .btn-panel:hover { background:#fff; color:#000; }
+        .cart-count { background:#ff4757; color:white; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; }
+        .content-body { display:flex; justify-content:space-between; align-items:center; width:100%; }
+        .left-info { max-width:400px; color:#fff; pointer-events:auto; }
+        .nav-arrows { display:flex; gap:12px; margin-bottom:16px; }
+        .nav-arrows button { width:44px; height:44px; border-radius:50%; border:1px solid rgba(255,255,255,0.35); background:rgba(255,255,255,0.1); color:white; font-size:16px; cursor:pointer; transition:0.25s; }
+        .nav-arrows button:hover { background:white; color:black; transform:scale(1.05); }
+        .prod-tag { background:rgba(255,255,255,0.2); padding:5px 15px; border-radius:20px; font-size:12.5px; display:inline-block; margin-bottom:12px; letter-spacing:0.5px; backdrop-filter:blur(5px); }
+        .prod-title { font-size:38px; font-weight:700; line-height:1.25; margin-bottom:14px; text-shadow:0 4px 15px rgba(0,0,0,0.35); }
+        .prod-desc { font-size:15px; line-height:1.65; opacity:0.92; margin-bottom:26px; text-shadow:0 2px 5px rgba(0,0,0,0.3); }
+        .action-buttons { display:flex; gap:14px; }
+        .btn-order { background:white; color:black; border:none; padding:14px 30px; border-radius:30px; font-size:15px; font-weight:600; cursor:pointer; transition:0.3s; }
+        .btn-order:hover { transform:translateY(-2px); box-shadow:0 10px 25px rgba(0,0,0,0.4); }
+        .btn-cart { background:transparent; color:white; border:1.5px solid rgba(255,255,255,0.65); padding:14px 24px; border-radius:30px; font-size:15px; font-weight:500; cursor:pointer; transition:0.3s; }
+        .btn-cart:hover { background:rgba(255,255,255,0.2); }
+        .right-info { text-align:right; color:white; pointer-events:auto; }
+        .price-tag { font-size:44px; font-weight:700; margin-bottom:4px; text-shadow:0 4px 15px rgba(0,0,0,0.3); }
+        .old-price { font-size:20px; text-decoration:line-through; opacity:0.65; margin-bottom:24px; }
+        .size-box p { font-size:13px; opacity:0.85; margin-bottom:10px; }
+        .size-pills { display:flex; gap:8px; justify-content:flex-end; }
+        .size-pill { padding:7px 16px; border:1px solid rgba(255,255,255,0.4); border-radius:20px; font-size:13px; cursor:pointer; transition:0.25s; }
+        .size-pill.active, .size-pill:hover { background:white; color:black; border-color:white; }
+        footer { display:flex; justify-content:space-between; align-items:flex-end; font-size:13px; opacity:0.85; }
+        .hint-text { background:rgba(0,0,0,0.3); padding:6px 16px; border-radius:20px; backdrop-filter:blur(5px); }
+        .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(10px); z-index:1000; align-items:center; justify-content:center; }
+        .modal-overlay.open { display:flex; }
+        .modal-window { background:#fff; color:#111; width:92%; max-width:520px; max-height:88vh; overflow-y:auto; border-radius:20px; padding:26px 32px; box-shadow:0 25px 60px rgba(0,0,0,0.4); }
+        .modal-header { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:12px; margin-bottom:18px; }
+        .modal-header h3 { font-size:20px; color:#222; }
+        .btn-close { background:none; border:none; font-size:26px; cursor:pointer; color:#747d8c; }
+        .form-group { margin-bottom:14px; }
+        .form-group label { display:block; font-size:13px; font-weight:600; color:#4b4b4b; margin-bottom:5px; }
+        .form-group input, .form-group select, .form-group textarea { width:100%; padding:10px 14px; border:1px solid #dcdde1; border-radius:8px; font-size:14px; outline:none; }
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        .order-summary-box { background:#f8f9fa; padding:12px 16px; border-radius:10px; margin-bottom:15px; border-left:4px solid #ff4757; }
+        .btn-confirm-order { width:100%; background:#2ed573; color:white; border:none; padding:14px; border-radius:8px; font-size:16px; font-weight:600; cursor:pointer; transition:0.2s; }
+        .btn-confirm-order:hover { background:#26af5f; }
+        @media (max-width:860px) {
+            .main-frame { width:100vw; height:100vh; border-radius:0; }
+            .ui-layer { padding:20px 24px; }
+            .search-container { display:none; }
+            .content-body { flex-direction:column; justify-content:space-between; height:78%; text-align:center; }
+            .product-3d-wrapper { width:280px; height:400px; }
+            .left-info { max-width:100%; }
+            .nav-arrows, .action-buttons, .size-pills { justify-content:center; }
+            .right-info { text-align:center; }
+            footer { display:none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-frame" id="appFrame">
+        <div class="ambient-backlight" id="ambientLight"></div>
+        <div class="stage-area" id="stageArea">
+            <div class="product-3d-wrapper" id="productWrapper">
+                <img src="" alt="Real Skincare Product" class="real-product-img" id="realProductImg">
+                <div class="ground-shadow-wrap">
+                    <div class="ambient-shadow"></div>
+                    <div class="contact-shadow"></div>
+                </div>
+            </div>
+        </div>
+        <div class="ui-layer">
+            <header class="interactive">
+                <div class="brand-logo" id="headerBrandTitle">✨ ত্বকের যত্ন <span>SkinCare Studio</span></div>
+                <div class="header-actions">
+                    <div class="search-container">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="searchInput" class="search-input" placeholder="আসল স্কিনকেয়ার খুঁজুন..." autocomplete="off">
+                        <ul class="search-results" id="searchResults"></ul>
+                    </div>
+                    <button class="btn-panel" id="openCartBtn">🛒 ব্যাগ <span class="cart-count" id="cartBadge">০</span></button>
+                </div>
+            </header>
+            <div class="content-body">
+                <div class="left-info">
+                    <div class="nav-arrows">
+                        <button id="prevBtn" title="পূর্ববর্তী">❮</button>
+                        <button id="nextBtn" title="পরবর্তী">❯</button>
+                    </div>
+                    <span class="prod-tag" id="prodTag">১০০% আসল প্রোডাক্ট</span>
+                    <h1 class="prod-title" id="prodTitle">লোড হচ্ছে...</h1>
+                    <p class="prod-desc" id="prodDesc">লোড হচ্ছে...</p>
+                    <div class="action-buttons">
+                        <button class="btn-order" id="orderNowBtn">এখনই অর্ডার করুন</button>
+                        <button class="btn-cart" id="addToCartBtn">+ ব্যাগে যোগ করুন</button>
+                    </div>
+                </div>
+                <div class="right-info">
+                    <div class="price-tag" id="prodPrice">৳ ০</div>
+                    <div class="old-price" id="prodOldPrice">৳ ০</div>
+                    <div class="size-box">
+                        <p>সাইজ নির্বাচন করুন</p>
+                        <div class="size-pills">
+                            <span class="size-pill active" data-extra="0">স্ট্যান্ডার্ড</span>
+                            <span class="size-pill" data-extra="200">লার্জ প্যাক</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer>
+                <div class="hint-text">💡 মাউস বা আঙুল দিয়ে ড্র্যাগ করে আসল ৩ডি প্যারালাক্স ফিল উপভোগ করুন</div>
+                <div id="footerSupportText">ক্যাশ অন ডেলিভারি সুবিধা • আসল ছবির শতভাগ নিশ্চয়তা</div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Order Modal -->
+    <div class="modal-overlay" id="orderModal">
+        <div class="modal-window">
+            <div class="modal-header">
+                <h3>🛍️ ডেলিভারি ও অর্ডার তথ্য</h3>
+                <button class="btn-close" id="closeOrderModal">&times;</button>
+            </div>
+            <div class="order-summary-box">
+                <h4 id="orderSummaryTitle">প্রোডাক্ট: -</h4>
+                <p id="orderSummaryPrice">মোট মূল্য: -</p>
+            </div>
+            <form id="orderForm" onsubmit="handleOrderSubmit(event)">
+                <div class="form-group">
+                    <label>আপনার পূর্ণ নাম *</label>
+                    <input type="text" id="custName" required placeholder="আপনার নাম লিখুন">
+                </div>
+                <div class="form-group">
+                    <label>মোবাইল নম্বর *</label>
+                    <input type="tel" id="custPhone" required placeholder="০১৭১XXXXXXXX">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>বিভাগ *</label>
+                        <select id="custDivision" required>
+                            <option value="">নির্বাচন করুন</option>
+                            <option value="Dhaka">ঢাকা</option>
+                            <option value="Chattogram">চট্টগ্রাম</option>
+                            <option value="Rajshahi">রাজশাহী</option>
+                            <option value="Khulna">খুলনা</option>
+                            <option value="Barishal">বরিশাল</option>
+                            <option value="Sylhet">সিলেট</option>
+                            <option value="Rangpur">রংপুর</option>
+                            <option value="Mymensingh">ময়মনসিংহ</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>জেলা / থানা *</label>
+                        <input type="text" id="custCity" required placeholder="যেমন: ধানমন্ডি">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>পূর্ণ ডেলিভারি ঠিকানা *</label>
+                    <textarea id="custAddress" rows="2" required placeholder="বাড়ি, রোড ও এলাকা লিখুন"></textarea>
+                </div>
+                <button type="submit" class="btn-confirm-order">অর্ডার কনফার্ম করুন</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Shopping Bag Modal -->
+    <div class="modal-overlay" id="cartModal">
+        <div class="modal-window">
+            <div class="modal-header">
+                <h3>🛒 আপনার শপিং ব্যাগ</h3>
+                <button class="btn-close" id="closeCartModal">&times;</button>
+            </div>
+            <div id="cartItemsList" style="margin-bottom:18px;"></div>
+            <div style="display:flex; justify-content:space-between; font-weight:bold; margin-bottom:16px; font-size:16px;">
+                <span>সর্বমোট:</span>
+                <span id="cartTotalPrice">৳ ০</span>
+            </div>
+            <button class="btn-confirm-order" onclick="proceedCartOrder()">চেকআউট করুন</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script>
+        let products = [];
+        let currentIndex = 0;
+        let selectedExtraPrice = 0;
+        let cart = [];
+        let deliveryCharge = 70;
+
+        const appFrame = document.getElementById('appFrame');
+        const ambientLight = document.getElementById('ambientLight');
+        const stageArea = document.getElementById('stageArea');
+        const productWrapper = document.getElementById('productWrapper');
+        const realProductImg = document.getElementById('realProductImg');
+
+        function toBengaliNum(num) {
+            const bnDigits = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+            return num.toString().replace(/\d/g, d => bnDigits[d]);
+        }
+
+        async function fetchStorefrontData() {
+            try {
+                const res = await fetch('/api/products');
+                products = await res.json();
+                const setRes = await fetch('/api/settings');
+                const config = await setRes.json();
+                if (config.brand_name) document.getElementById('headerBrandTitle').innerHTML = `✨ ${config.brand_name} <span>Studio Care</span>`;
+                if (config.delivery_charge) deliveryCharge = parseFloat(config.delivery_charge);
+                if (config.footer_notice) document.getElementById('footerSupportText').innerText = config.footer_notice;
+                if (products.length > 0) switchProduct(0, 1);
+            } catch(e) { console.error("Storefront error:", e); }
+        }
+
+        function updatePriceDisplay() {
+            if (products.length === 0) return;
+            const current = products[currentIndex];
+            const finalPrice = current.priceNum + selectedExtraPrice;
+            document.getElementById('prodPrice').innerText = `৳ ${toBengaliNum(finalPrice)}`;
+        }
+
+        function switchProduct(index, direction = 1) {
+            if (products.length === 0) return;
+            currentIndex = index;
+            const p = products[currentIndex];
+            appFrame.style.background = p.bgGradient;
+            ambientLight.style.setProperty('--ambient-glow', p.ambientGlow || 'rgba(255,255,255,0.2)');
+
+            gsap.to(['#prodTitle', '#prodDesc', '#prodPrice', '#prodOldPrice', '#prodTag'], {
+                opacity:0, y:-18 * direction, duration:0.22, ease:"power2.in",
+                onComplete: () => {
+                    document.getElementById('prodTitle').innerText = p.name;
+                    document.getElementById('prodDesc').innerText = p.desc;
+                    document.getElementById('prodOldPrice').innerText = p.oldPrice;
+                    document.getElementById('prodTag').innerText = p.tag;
+                    updatePriceDisplay();
+                    gsap.to(['#prodTitle', '#prodDesc', '#prodPrice', '#prodOldPrice', '#prodTag'], { opacity:1, y:0, duration:0.35, stagger:0.04, ease:"power2.out" });
+                }
+            });
+
+            gsap.to(realProductImg, {
+                opacity:0, scale:0.8, y:-30 * direction, duration:0.25, ease:"power2.in",
+                onComplete: () => {
+                    realProductImg.src = p.image;
+                    gsap.to(realProductImg, { opacity:1, scale:1, y:0, duration:0.55, ease:"back.out(1.2)" });
+                }
+            });
+        }
+
+        document.getElementById('nextBtn').onclick = () => switchProduct((currentIndex + 1) % products.length, 1);
+        document.getElementById('prevBtn').onclick = () => switchProduct((currentIndex - 1 + products.length) % products.length, -1);
+
+        function handleParallax(clientX, clientY) {
+            const rect = stageArea.getBoundingClientRect();
+            const x = clientX - rect.left - rect.width / 2;
+            const y = clientY - rect.top - rect.height / 2;
+            productWrapper.style.transform = `rotateX(${(-y / rect.height) * 26}deg) rotateY(${(x / rect.width) * 26}deg) scale(1.04)`;
+        }
+
+        stageArea.addEventListener('mousemove', (e) => handleParallax(e.clientX, e.clientY));
+        stageArea.addEventListener('mouseleave', () => productWrapper.style.transform = `rotateX(0deg) rotateY(0deg) scale(1)`);
+        stageArea.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) handleParallax(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: true });
+        stageArea.addEventListener('touchend', () => productWrapper.style.transform = `rotateX(0deg) rotateY(0deg) scale(1)`);
+
+        document.querySelectorAll('.size-pill').forEach(pill => {
+            pill.addEventListener('click', function() {
+                document.querySelectorAll('.size-pill').forEach(p => p.classList.remove('active'));
+                this.classList.add('active');
+                selectedExtraPrice = parseInt(this.dataset.extra || 0);
+                updatePriceDisplay();
+            });
+        });
+
+        const searchInput = document.getElementById('searchInput');
+        const searchResults = document.getElementById('searchResults');
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            searchResults.innerHTML = '';
+            if (!query) { searchResults.style.display = 'none'; return; }
+            const matches = products.filter(p => p.name.toLowerCase().includes(query) || p.tag.toLowerCase().includes(query));
+            if (matches.length > 0) {
+                searchResults.style.display = 'block';
+                matches.forEach(item => {
+                    const li = document.createElement('li');
+                    li.innerText = `${item.name} (৳ ${toBengaliNum(item.priceNum)})`;
+                    li.onclick = () => {
+                        const targetIdx = products.findIndex(x => x.id === item.id);
+                        if (targetIdx !== -1) switchProduct(targetIdx, 1);
+                        searchInput.value = '';
+                        searchResults.style.display = 'none';
+                    };
+                    searchResults.appendChild(li);
+                });
+            } else { searchResults.style.display = 'none'; }
+        });
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target)) searchResults.style.display = 'none';
+        });
+
+        const orderModal = document.getElementById('orderModal');
+        const cartModal = document.getElementById('cartModal');
+
+        document.getElementById('orderNowBtn').onclick = () => {
+            const current = products[currentIndex];
+            const finalPrice = current.priceNum + selectedExtraPrice;
+            document.getElementById('orderSummaryTitle').innerText = `প্রোডাক্ট: ${current.name}`;
+            document.getElementById('orderSummaryPrice').innerText = `মূল্য: ৳ ${toBengaliNum(finalPrice)} + ডেলিভারি (৳ ${toBengaliNum(deliveryCharge)})`;
+            orderModal.classList.add('open');
+        };
+
+        document.getElementById('closeOrderModal').onclick = () => orderModal.classList.remove('open');
+        document.getElementById('closeCartModal').onclick = () => cartModal.classList.remove('open');
+
+        document.getElementById('addToCartBtn').onclick = () => {
+            const current = products[currentIndex];
+            const finalPrice = current.priceNum + selectedExtraPrice;
+            cart.push({ ...current, calculatedPrice: finalPrice });
+            document.getElementById('cartBadge').innerText = toBengaliNum(cart.length);
+            alert(`"${current.name}" ব্যাগে যোগ করা হয়েছে!`);
+        };
+
+        document.getElementById('openCartBtn').onclick = () => { renderCartItems(); cartModal.classList.add('open'); };
+
+        function renderCartItems() {
+            const list = document.getElementById('cartItemsList');
+            list.innerHTML = '';
+            if (cart.length === 0) {
+                list.innerHTML = '<p style="color:#777; text-align:center; padding:15px;">আপনার ব্যাগ খালি!</p>';
+                document.getElementById('cartTotalPrice').innerText = '৳ ০';
+                return;
+            }
+            let total = 0;
+            cart.forEach((item, index) => {
+                total += item.calculatedPrice;
+                const div = document.createElement('div');
+                div.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #f0f0f0;";
+                div.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <img src="${item.image}" style="width:36px; height:36px; object-fit:contain;">
+                        <div>
+                            <strong style="font-size:13.5px;">${item.name}</strong>
+                            <p style="font-size:12px; color:#666;">৳ ${toBengaliNum(item.calculatedPrice)}</p>
+                        </div>
+                    </div>
+                    <button onclick="removeCartItem(${index})" style="background:none; border:none; color:#ff4757; cursor:pointer; font-size:13px; font-weight:600;">মুছুন</button>
+                `;
+                list.appendChild(div);
+            });
+            document.getElementById('cartTotalPrice').innerText = `৳ ${toBengaliNum(total)}`;
+        }
+
+        window.removeCartItem = (idx) => {
+            cart.splice(idx, 1);
+            document.getElementById('cartBadge').innerText = toBengaliNum(cart.length);
+            renderCartItems();
+        };
+
+        window.proceedCartOrder = () => {
+            if (cart.length === 0) return alert("ব্যাগে কোনো প্রোডাক্ট নেই!");
+            cartModal.classList.remove('open');
+            const total = cart.reduce((sum, item) => sum + item.calculatedPrice, 0);
+            document.getElementById('orderSummaryTitle').innerText = `মোট প্রোডাক্ট সংখ্যা: ${toBengaliNum(cart.length)} টি`;
+            document.getElementById('orderSummaryPrice').innerText = `সর্বমোট: ৳ ${toBengaliNum(total)} + ডেলিভারি চার্জ (৳ ${toBengaliNum(deliveryCharge)})`;
+            orderModal.classList.add('open');
+        };
+
+        window.handleOrderSubmit = async (e) => {
+            e.preventDefault();
+            const current = products[currentIndex];
+            const finalPrice = cart.length > 0 
+                ? cart.reduce((sum, item) => sum + item.calculatedPrice, 0) + deliveryCharge 
+                : current.priceNum + selectedExtraPrice + deliveryCharge;
+
+            const orderPayload = {
+                customer_name: document.getElementById('custName').value,
+                phone: document.getElementById('custPhone').value,
+                address: `${document.getElementById('custAddress').value}, ${document.getElementById('custCity').value}, ${document.getElementById('custDivision').value}`,
+                items: cart.length > 0 ? cart.map(i => `${i.name} (৳${i.calculatedPrice})`).join(', ') : `${current.name} (১টি)`,
+                total_amount: finalPrice
+            };
+
+            try {
+                const res = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderPayload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert(`ধন্যবাদ! আপনার অর্ডারটি কনফার্ম হয়েছে। ট্র্যাকিং আইডি: ${data.order_number}`);
+                    orderModal.classList.remove('open');
+                    document.getElementById('orderForm').reset();
+                    cart = [];
+                    document.getElementById('cartBadge').innerText = '০';
+                }
+            } catch(err) { alert("অর্ডার সম্পন্ন করা সম্ভব হয়নি।"); }
+        };
+
+        fetchStorefrontData();
+    </script>
+</body>
+</html>

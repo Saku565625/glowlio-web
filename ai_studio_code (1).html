@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>অ্যাডমিন ড্যাশবোর্ড - মাস্টার কন্ট্রোল</title>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Hind Siliguri', sans-serif; }
+        body { background:#f4f6f9; color:#2d3436; min-height:100vh; display:flex; }
+        aside { width:260px; background:#1e272e; color:#fff; padding:24px 18px; display:flex; flex-direction:column; justify-content:space-between; }
+        .brand-heading { font-size:19px; font-weight:700; padding-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:20px; }
+        .nav-link { display:block; padding:12px 14px; color:#d2dae2; text-decoration:none; border-radius:8px; margin-bottom:8px; cursor:pointer; font-size:14.5px; }
+        .nav-link:hover, .nav-link.active { background:#0984e3; color:#fff; }
+        main { flex:1; padding:30px 40px; overflow-y:auto; height:100vh; }
+        .page-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; }
+        .card { background:#fff; border-radius:14px; padding:25px; box-shadow:0 4px 15px rgba(0,0,0,0.04); margin-bottom:25px; }
+        .tab-section { display:none; }
+        .tab-section.active { display:block; }
+        .form-group { margin-bottom:16px; }
+        .form-group label { display:block; font-size:13px; font-weight:600; margin-bottom:6px; }
+        .form-group input, .form-group select, .form-group textarea { width:100%; padding:10px 14px; border:1px solid #ced6e0; border-radius:8px; outline:none; font-size:14px; }
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:15px; }
+        .btn-primary { background:#0984e3; color:#fff; border:none; padding:12px 24px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; }
+        .btn-danger { background:#eb4d4b; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:12px; }
+        .upload-dropzone { border:2px dashed #74b9ff; background:#f1f7fc; padding:25px; border-radius:10px; text-align:center; cursor:pointer; margin-bottom:15px; }
+        .preview-box { height:160px; display:flex; align-items:center; justify-content:center; background:#fafafa; border-radius:8px; margin-bottom:15px; border:1px solid #eee; }
+        .preview-box img { max-height:100%; max-width:100%; object-fit:contain; }
+        table { width:100%; border-collapse:collapse; font-size:13.5px; }
+        th, td { padding:12px; text-align:left; border-bottom:1px solid #f1f2f6; }
+        th { background:#f8f9fa; color:#576574; }
+        .badge { padding:4px 10px; border-radius:12px; font-size:11px; font-weight:600; }
+        .badge-pending { background:#ffeaa7; color:#d35400; }
+        .badge-done { background:#55efc4; color:#00b894; }
+    </style>
+</head>
+<body>
+    <aside>
+        <div>
+            <div class="brand-heading">⚙️ অ্যাডমিন কনসোল</div>
+            <div class="nav-link active" onclick="showTab('tabProducts', this)">📦 প্রোডাক্ট ম্যানেজমেন্ট</div>
+            <div class="nav-link" onclick="showTab('tabAddProduct', this)">➕ নতুন প্রোডাক্ট যোগ</div>
+            <div class="nav-link" onclick="showTab('tabOrders', this)">🛍️ গ্রাহকের অর্ডারসমূহ</div>
+            <div class="nav-link" onclick="showTab('tabSettings', this)">🎨 ওয়েবসাইট সেটিংস</div>
+        </div>
+        <button class="btn-danger" onclick="logoutAdmin()" style="width:100%; padding:10px;">লগআউট</button>
+    </aside>
+    <main>
+        <!-- Product List -->
+        <div id="tabProducts" class="tab-section active">
+            <div class="page-header">
+                <h2>স্টোরে থাকা সকল প্রোডাক্ট</h2>
+                <button class="btn-primary" onclick="showTab('tabAddProduct', document.querySelectorAll('.nav-link')[1])">+ নতুন প্রোডাক্ট যোগ করুন</button>
+            </div>
+            <div class="card">
+                <table>
+                    <thead>
+                        <tr><th>ছবি</th><th>নাম</th><th>ক্যাটাগরি</th><th>মূল্য</th><th>স্টক</th><th>অ্যাকশন</th></tr>
+                    </thead>
+                    <tbody id="productsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Add Product -->
+        <div id="tabAddProduct" class="tab-section">
+            <div class="page-header"><h2>নতুন প্রোডাক্ট যোগ করুন (স্বচ্ছ PNG ছবি)</h2></div>
+            <div class="card" style="max-width:780px;">
+                <form id="addProductForm" onsubmit="handleProductCreate(event)">
+                    <div class="upload-dropzone" onclick="document.getElementById('fileInput').click()">
+                        <input type="file" id="fileInput" name="product_image" accept="image/png,image/webp,image/jpeg" style="display:none;" required>
+                        <p><strong>📁 প্রোডাক্টের স্বচ্ছ (Transparent) ছবি আপলোড করুন</strong></p>
+                        <span style="font-size:12px; color:#7f8c8d;">ব্যাকগ্রাউন্ড ছাড়া আসল PNG বা WebP ছবি নির্বাচন করুন</span>
+                    </div>
+                    <div class="preview-box" id="previewContainer" style="display:none;">
+                        <img id="liveImgPreview" src="" alt="Preview">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>প্রোডাক্টের নাম *</label>
+                            <input type="text" id="newProdName" required placeholder="যেমন: Rose Water Mist">
+                        </div>
+                        <div class="form-group">
+                            <label>ট্যাগলাইন বা শর্ট ফর্মুলা *</label>
+                            <input type="text" id="newProdTag" required placeholder="যেমন: 100% Natural Distilled">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>মূল্য (৳) *</label>
+                            <input type="number" id="newProdPrice" required placeholder="650">
+                        </div>
+                        <div class="form-group">
+                            <label>পূর্বের কাটা মূল্য (যেমন: ৳ ৮৫০)</label>
+                            <input type="text" id="newProdOldPrice" placeholder="৳ ৮৫০">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>ক্যাটাগরি</label>
+                            <select id="newProdCategory">
+                                <option value="Face Care">ফেস কেয়ার</option>
+                                <option value="Serum">সিরাম ও এসেন্স</option>
+                                <option value="Cleanser">ক্লিনজার ও ফেসওয়াশ</option>
+                                <option value="Toner & Mist">টোনার ও মিস্ট</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>স্টুডিও ব্যাকগ্রাউন্ড লাইটিং কালার</label>
+                            <select id="newProdBg">
+                                <option value="radial-gradient(circle at 55% 45%, #9e4368 0%, #3a1022 60%, #100308 100%)">রোজ পিংক (Rose Glow)</option>
+                                <option value="radial-gradient(circle at 55% 45%, #2a6f4e 0%, #0d2e1f 60%, #030d08 100%)">টি-ট্রি এমারেল্ড (Green Bloom)</option>
+                                <option value="radial-gradient(circle at 55% 45%, #2b5876 0%, #112535 60%, #040c14 100%)">ক্লিনিক্যাল ব্লু (Pure Blue)</option>
+                                <option value="radial-gradient(circle at 55% 45%, #8f4f24 0%, #291206 60%, #0e0501 100%)">অরেঞ্জ গোল্ড (Warm Amber)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>বিস্তারিত বিবরণ *</label>
+                        <textarea id="newProdDesc" rows="3" required placeholder="প্রোডাক্টের উপাদান ও ব্যবহারের নিয়ম লিখুন..."></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary" style="width:100%;">প্রোডাক্ট পাবলিশ করুন</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Orders -->
+        <div id="tabOrders" class="tab-section">
+            <div class="page-header"><h2>গ্রাহকদের লাইভ অর্ডার তালিকা</h2></div>
+            <div class="card">
+                <table>
+                    <thead>
+                        <tr><th>অর্ডার নাম্বার</th><th>গ্রাহক ও মোবাইল</th><th>ডেলিভারি ঠিকানা</th><th>আইটেম</th><th>সর্বমোট</th><th>স্ট্যাটাস</th><th>অ্যাকশন</th></tr>
+                    </thead>
+                    <tbody id="ordersTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Settings -->
+        <div id="tabSettings" class="tab-section">
+            <div class="page-header"><h2>ওয়েবসাইট সেটিংস ও অ্যাডমিন সিকিউরিটি</h2></div>
+            <div class="card" style="max-width:600px;">
+                <form onsubmit="handleSettingsUpdate(event)">
+                    <div class="form-group">
+                        <label>দোকানের নাম (Brand Name)</label>
+                        <input type="text" id="cfgBrandName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>ডেলিভারি চার্জ (টাকা)</label>
+                        <input type="number" id="cfgDeliveryCharge" required>
+                    </div>
+                    <div class="form-group">
+                        <label>ফুটার সাপোর্ট নোটিশ</label>
+                        <input type="text" id="cfgFooterNotice" required>
+                    </div>
+                    <div class="form-group">
+                        <label>অ্যাডমিন পাসওয়ার্ড পরিবর্তন</label>
+                        <input type="password" id="cfgNewPass" placeholder="নতুন পাসওয়ার্ড দিন (না বদলাতে চাইলে ফাঁকা রাখুন)">
+                    </div>
+                    <button type="submit" class="btn-primary">সেটিংস সেভ করুন</button>
+                </form>
+            </div>
+        </div>
+    </main>
+    <script>
+        function showTab(tabId, el) {
+            document.querySelectorAll('.tab-section').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            if (el) el.classList.add('active');
+            if (tabId === 'tabProducts') loadProducts();
+            if (tabId === 'tabOrders') loadOrders();
+            if (tabId === 'tabSettings') loadSettings();
+        }
+
+        document.getElementById('fileInput').onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    document.getElementById('liveImgPreview').src = event.target.result;
+                    document.getElementById('previewContainer').style.display = 'flex';
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        async function loadProducts() {
+            const res = await fetch('/api/products');
+            const data = await res.json();
+            const tbody = document.getElementById('productsTableBody');
+            tbody.innerHTML = '';
+            data.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><img src="${p.image}" style="width:40px; height:40px; object-fit:contain;"></td>
+                    <td><strong>${p.name}</strong><br><small style="color:#777;">${p.tag}</small></td>
+                    <td>${p.category || 'N/A'}</td>
+                    <td>৳ ${p.priceNum}</td>
+                    <td><span class="badge ${p.inStock ? 'badge-done' : 'badge-pending'}">${p.inStock ? 'ইন স্টক' : 'স্টক আউট'}</span></td>
+                    <td><button class="btn-danger" onclick="deleteProduct(${p.id})">ডিলিট</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function deleteProduct(id) {
+            if (!confirm("আপনি কি নিশ্চিতভাবে এই প্রোডাক্টটি ডিলিট করতে চান?")) return;
+            const res = await fetch(`/api/admin/products/${id}`, { method: 'DELETE' });
+            if (res.ok) loadProducts();
+        }
+
+        async function handleProductCreate(e) {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append('product_image', document.getElementById('fileInput').files[0]);
+            formData.append('name', document.getElementById('newProdName').value);
+            formData.append('tag', document.getElementById('newProdTag').value);
+            formData.append('priceNum', document.getElementById('newProdPrice').value);
+            formData.append('oldPrice', document.getElementById('newProdOldPrice').value);
+            formData.append('category', document.getElementById('newProdCategory').value);
+            formData.append('bgGradient', document.getElementById('newProdBg').value);
+            formData.append('desc', document.getElementById('newProdDesc').value);
+            formData.append('inStock', '1');
+
+            const res = await fetch('/api/admin/products', { method: 'POST', body: formData });
+            if (res.ok) {
+                alert("প্রোডাক্ট সফলভাবে স্টোরে পাবলিশ হয়েছে!");
+                document.getElementById('addProductForm').reset();
+                document.getElementById('previewContainer').style.display = 'none';
+                showTab('tabProducts', document.querySelectorAll('.nav-link')[0]);
+            }
+        }
+
+        async function loadOrders() {
+            const res = await fetch('/api/admin/orders');
+            const data = await res.json();
+            const tbody = document.getElementById('ordersTableBody');
+            tbody.innerHTML = '';
+            data.forEach(o => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${o.order_number}</strong></td>
+                    <td>${o.customer_name}<br><small style="color:#666;">${o.phone}</small></td>
+                    <td style="max-width:200px;">${o.address}</td>
+                    <td>${o.items}</td>
+                    <td><strong>৳ ${o.total_amount}</strong></td>
+                    <td><span class="badge ${o.status === 'Completed' ? 'badge-done' : 'badge-pending'}">${o.status}</span></td>
+                    <td>
+                        ${o.status === 'Pending' 
+                            ? `<button class="btn-primary" style="padding:4px 8px; font-size:11px;" onclick="updateOrderStatus(${o.id}, 'Completed')">মার্ক ডেলিভার্ড</button>`
+                            : `<button class="btn-danger" style="padding:4px 8px; font-size:11px;" onclick="updateOrderStatus(${o.id}, 'Pending')">পেন্ডিং করুন</button>`
+                        }
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function updateOrderStatus(id, status) {
+            await fetch(`/api/admin/orders/${id}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status })
+            });
+            loadOrders();
+        }
+
+        async function loadSettings() {
+            const res = await fetch('/api/settings');
+            const cfg = await res.json();
+            document.getElementById('cfgBrandName').value = cfg.brand_name || '';
+            document.getElementById('cfgDeliveryCharge').value = cfg.delivery_charge || '70';
+            document.getElementById('cfgFooterNotice').value = cfg.footer_notice || '';
+        }
+
+        async function handleSettingsUpdate(e) {
+            e.preventDefault();
+            const payload = {
+                brand_name: document.getElementById('cfgBrandName').value,
+                delivery_charge: document.getElementById('cfgDeliveryCharge').value,
+                footer_notice: document.getElementById('cfgFooterNotice').value,
+                new_password: document.getElementById('cfgNewPass').value
+            };
+            const res = await fetch('/api/admin/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                alert("সেটিংস সফলভাবে আপডেট হয়েছে!");
+                document.getElementById('cfgNewPass').value = '';
+            }
+        }
+
+        async function logoutAdmin() {
+            await fetch('/api/admin/logout', { method: 'POST' });
+            window.location.href = '/admin/login';
+        }
+
+        loadProducts();
+    </script>
+</body>
+</html>

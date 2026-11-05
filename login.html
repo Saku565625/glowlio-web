@@ -1,42 +1,44 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>অ্যাডমিন অথেন্টিকেশন - সুরক্ষিত লগইন</title>
-    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        * { margin:0; padding:0; box-sizing:border-box; font-family:'Hind Siliguri',sans-serif; }
-        body { background:#0c1017; min-height:100vh; display:flex; align-items:center; justify-content:center; color:#fff; }
-        .login-card { background:#161d27; width:100%; max-width:400px; padding:38px 32px; border-radius:14px; box-shadow:0 25px 60px rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.06); }
-        .login-card h2 { font-size:22px; margin-bottom:8px; text-align:center; }
-        .login-card p { font-size:13px; color:#8c9ba5; text-align:center; margin-bottom:26px; }
-        .form-group { margin-bottom:18px; }
-        .form-group label { display:block; font-size:13px; color:#b0bec5; margin-bottom:6px; }
-        .form-group input { width:100%; padding:12px 15px; background:#0b0f15; border:1px solid #263342; border-radius:8px; color:#fff; outline:none; font-size:14px; }
-        .form-group input:focus { border-color:#0984e3; }
-        .btn-submit { width:100%; background:#0984e3; color:#fff; border:none; padding:12px; border-radius:8px; font-size:15px; font-weight:600; cursor:pointer; }
-        .btn-submit:hover { background:#076fc0; }
-        .alert-error { background:rgba(235,77,75,0.15); border:1px solid #eb4d4b; color:#ff7979; padding:10px; border-radius:6px; font-size:13px; margin-bottom:18px; display:none; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>অ্যাডমিন লগইন</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;font-family:'Hind Siliguri',sans-serif}body{margin:0;background:#0c1017;min-height:100vh;display:flex;align-items:center;justify-content:center;color:#fff;padding:20px}.login-card{background:#161d27;width:100%;max-width:400px;padding:38px 32px;border-radius:14px;box-shadow:0 25px 60px #0009;border:1px solid #ffffff10}.login-card h2{font-size:22px;margin:0 0 8px;text-align:center}.subtitle{font-size:13px;color:#8c9ba5;text-align:center;margin:0 0 26px}.form-group{margin-bottom:18px}.form-group label{display:block;font-size:13px;color:#b0bec5;margin-bottom:6px}.form-group input{width:100%;padding:12px 15px;background:#0b0f15;border:1px solid #263342;border-radius:8px;color:#fff;outline:none;font-size:14px}.form-group input:focus{border-color:#0984e3}.btn-submit{width:100%;background:#0984e3;color:#fff;border:0;padding:12px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer}.btn-submit:hover{background:#076fc0}.forgot{display:block;width:100%;margin-top:12px;padding:8px;background:none;border:0;color:#74b9ff;cursor:pointer;font-size:14px}.forgot:disabled{opacity:.6;cursor:wait}.message{display:none;padding:10px;border-radius:6px;font-size:13px;margin-bottom:18px}.message.error{display:block;background:#eb4d4b26;border:1px solid #eb4d4b;color:#ff7979}.message.success{display:block;background:#2ecc7120;border:1px solid #27ae60;color:#7bed9f}
+  </style>
 </head>
 <body>
-    <div class="login-card">
-        <h2>🔒 অ্যাডমিন অথেন্টিকেশন</h2>
-        <p>সিস্টেম ম্যানেজমেন্ট প্যানেলে প্রবেশের জন্য লগইন করুন</p>
-        <div class="alert-error" id="errBox"></div>
-        <form id="adminLoginForm">
-            <div class="form-group">
-                <label>অ্যাডমিন ইমেইল</label>
-                <input type="email" id="username" required autocomplete="username" placeholder="ইমেইল লিখুন">
-            </div>
-            <div class="form-group">
-                <label>পাসওয়ার্ড</label>
-                <input type="password" id="password" required autocomplete="current-password" placeholder="••••••••">
-            </div>
-            <button type="submit" class="btn-submit">লগইন করুন</button>
-        </form>
-    </div>
-    <script type="module" src="./login.js"></script>
+  <main class="login-card">
+    <h2>🔒 অ্যাডমিন অথেন্টিকেশন</h2>
+    <p class="subtitle">সিস্টেম ম্যানেজমেন্ট প্যানেলে প্রবেশের জন্য লগইন করুন</p>
+    <div class="message" id="errBox" role="status" aria-live="polite"></div>
+    <form id="adminLoginForm">
+      <div class="form-group"><label for="username">অ্যাডমিন ইমেইল</label><input type="email" id="username" required autocomplete="username" placeholder="ইমেইল লিখুন"></div>
+      <div class="form-group"><label for="password">পাসওয়ার্ড</label><input type="password" id="password" required autocomplete="current-password" placeholder="••••••••"></div>
+      <button type="submit" class="btn-submit">লগইন করুন</button>
+      <button type="button" id="forgotPasswordBtn" class="forgot">পাসওয়ার্ড ভুলে গেছেন?</button>
+    </form>
+  </main>
+  <script type="module">
+    import { supabase } from "./supabase-client.js";
+    const emailInput=document.getElementById("username");
+    const box=document.getElementById("errBox");
+    const button=document.getElementById("forgotPasswordBtn");
+    button.addEventListener("click",async()=>{
+      const email=emailInput.value.trim();
+      if(!email){box.textContent="আগে আপনার ইমেইল ঠিকানাটি লিখুন।";box.className="message error";emailInput.focus();return;}
+      button.disabled=true;button.textContent="ইমেইল পাঠানো হচ্ছে…";
+      try{
+        const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+"/reset-password.html"});
+        if(error) throw error;
+        box.textContent="ইমেইলটি Supabase-এ থাকলে পাসওয়ার্ড রিসেটের লিংক পাঠানো হয়েছে। Inbox ও Spam ফোল্ডার দেখুন।";
+        box.className="message success";
+      }catch(error){console.error("Password recovery failed:",error);box.textContent="রিসেট ইমেইল পাঠানো যায়নি। একটু পরে আবার চেষ্টা করুন।";box.className="message error";}
+      finally{button.disabled=false;button.textContent="পাসওয়ার্ড ভুলে গেছেন?";}
+    });
+  </script>
+  <script type="module" src="./login.js"></script>
 </body>
 </html>

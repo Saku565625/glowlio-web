@@ -27,8 +27,8 @@
         <div class="alert-error" id="errBox"></div>
         <form id="adminLoginForm">
             <div class="form-group">
-                <label>অ্যাডমিন ইউজারনেম</label>
-                <input type="text" id="username" required autocomplete="username" placeholder="ইউজারনেম লিখুন">
+                <label>অ্যাডমিন ইমেইল</label>
+                <input type="email" id="username" required autocomplete="username" placeholder="ইমেইল লিখুন">
             </div>
             <div class="form-group">
                 <label>পাসওয়ার্ড</label>
@@ -37,32 +37,6 @@
             <button type="submit" class="btn-submit">লগইন করুন</button>
         </form>
     </div>
-    <script>
-        document.getElementById('adminLoginForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const errBox = document.getElementById('errBox');
-            errBox.style.display = 'none';
-            try {
-                const res = await fetch('/api/admin/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        username: document.getElementById('username').value,
-                        password: document.getElementById('password').value
-                    })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    window.location.href = data.redirect;
-                } else {
-                    errBox.innerText = data.error || 'লগইন ব্যর্থ হয়েছে।';
-                    errBox.style.display = 'block';
-                }
-            } catch(err) {
-                errBox.innerText = 'সার্ভার যোগাযোগে সমস্যা হয়েছে।';
-                errBox.style.display = 'block';
-            }
-        };
-    </script>
+    <script type="module" src="./login.js"></script>
 </body>
 </html>

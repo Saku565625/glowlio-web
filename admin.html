@@ -64,11 +64,11 @@
 
         <!-- Add Product -->
         <div id="tabAddProduct" class="tab-section">
-            <div class="page-header"><h2>নতুন প্রোডাক্ট যোগ করুন (স্বচ্ছ PNG ছবি)</h2></div>
+            <div class="page-header"><h2>নতুন প্রোডাক্ট যোগ বা এডিট করুন</h2></div>
             <div class="card" style="max-width:780px;">
                 <form id="addProductForm" onsubmit="handleProductCreate(event)">
                     <div class="upload-dropzone" onclick="document.getElementById('fileInput').click()">
-                        <input type="file" id="fileInput" name="product_image" accept="image/png,image/webp,image/jpeg" style="display:none;" required>
+                        <input type="file" id="fileInput" name="product_image" accept="image/png,image/webp,image/jpeg" style="display:none;">
                         <p><strong>📁 প্রোডাক্টের স্বচ্ছ (Transparent) ছবি আপলোড করুন</strong></p>
                         <span style="font-size:12px; color:#7f8c8d;">ব্যাকগ্রাউন্ড ছাড়া আসল PNG বা WebP ছবি নির্বাচন করুন</span>
                     </div>
@@ -119,7 +119,8 @@
                         <label>বিস্তারিত বিবরণ *</label>
                         <textarea id="newProdDesc" rows="3" required placeholder="প্রোডাক্টের উপাদান ও ব্যবহারের নিয়ম লিখুন..."></textarea>
                     </div>
-                    <button type="submit" class="btn-primary" style="width:100%;">প্রোডাক্ট পাবলিশ করুন</button>
+                    <button type="submit" id="productSubmitButton" class="btn-primary" style="width:100%;">প্রোডাক্ট পাবলিশ করুন</button>
+                    <button type="button" id="cancelProductEdit" class="btn-danger" style="display:none; margin-top:10px;">এডিট বাতিল করুন</button>
                 </form>
             </div>
         </div>
@@ -163,143 +164,6 @@
             </div>
         </div>
     </main>
-    <script>
-        function showTab(tabId, el) {
-            document.querySelectorAll('.tab-section').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            if (el) el.classList.add('active');
-            if (tabId === 'tabProducts') loadProducts();
-            if (tabId === 'tabOrders') loadOrders();
-            if (tabId === 'tabSettings') loadSettings();
-        }
-
-        document.getElementById('fileInput').onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    document.getElementById('liveImgPreview').src = event.target.result;
-                    document.getElementById('previewContainer').style.display = 'flex';
-                };
-                reader.readAsDataURL(file);
-            }
-        };
-
-        async function loadProducts() {
-            const res = await fetch('/api/products');
-            const data = await res.json();
-            const tbody = document.getElementById('productsTableBody');
-            tbody.innerHTML = '';
-            data.forEach(p => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><img src="${p.image}" style="width:40px; height:40px; object-fit:contain;"></td>
-                    <td><strong>${p.name}</strong><br><small style="color:#777;">${p.tag}</small></td>
-                    <td>${p.category || 'N/A'}</td>
-                    <td>৳ ${p.priceNum}</td>
-                    <td><span class="badge ${p.inStock ? 'badge-done' : 'badge-pending'}">${p.inStock ? 'ইন স্টক' : 'স্টক আউট'}</span></td>
-                    <td><button class="btn-danger" onclick="deleteProduct(${p.id})">ডিলিট</button></td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        async function deleteProduct(id) {
-            if (!confirm("আপনি কি নিশ্চিতভাবে এই প্রোডাক্টটি ডিলিট করতে চান?")) return;
-            const res = await fetch(`/api/admin/products/${id}`, { method: 'DELETE' });
-            if (res.ok) loadProducts();
-        }
-
-        async function handleProductCreate(e) {
-            e.preventDefault();
-            const formData = new FormData();
-            formData.append('product_image', document.getElementById('fileInput').files[0]);
-            formData.append('name', document.getElementById('newProdName').value);
-            formData.append('tag', document.getElementById('newProdTag').value);
-            formData.append('priceNum', document.getElementById('newProdPrice').value);
-            formData.append('oldPrice', document.getElementById('newProdOldPrice').value);
-            formData.append('category', document.getElementById('newProdCategory').value);
-            formData.append('bgGradient', document.getElementById('newProdBg').value);
-            formData.append('desc', document.getElementById('newProdDesc').value);
-            formData.append('inStock', '1');
-
-            const res = await fetch('/api/admin/products', { method: 'POST', body: formData });
-            if (res.ok) {
-                alert("প্রোডাক্ট সফলভাবে স্টোরে পাবলিশ হয়েছে!");
-                document.getElementById('addProductForm').reset();
-                document.getElementById('previewContainer').style.display = 'none';
-                showTab('tabProducts', document.querySelectorAll('.nav-link')[0]);
-            }
-        }
-
-        async function loadOrders() {
-            const res = await fetch('/api/admin/orders');
-            const data = await res.json();
-            const tbody = document.getElementById('ordersTableBody');
-            tbody.innerHTML = '';
-            data.forEach(o => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><strong>${o.order_number}</strong></td>
-                    <td>${o.customer_name}<br><small style="color:#666;">${o.phone}</small></td>
-                    <td style="max-width:200px;">${o.address}</td>
-                    <td>${o.items}</td>
-                    <td><strong>৳ ${o.total_amount}</strong></td>
-                    <td><span class="badge ${o.status === 'Completed' ? 'badge-done' : 'badge-pending'}">${o.status}</span></td>
-                    <td>
-                        ${o.status === 'Pending' 
-                            ? `<button class="btn-primary" style="padding:4px 8px; font-size:11px;" onclick="updateOrderStatus(${o.id}, 'Completed')">মার্ক ডেলিভার্ড</button>`
-                            : `<button class="btn-danger" style="padding:4px 8px; font-size:11px;" onclick="updateOrderStatus(${o.id}, 'Pending')">পেন্ডিং করুন</button>`
-                        }
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        async function updateOrderStatus(id, status) {
-            await fetch(`/api/admin/orders/${id}/status`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status })
-            });
-            loadOrders();
-        }
-
-        async function loadSettings() {
-            const res = await fetch('/api/settings');
-            const cfg = await res.json();
-            document.getElementById('cfgBrandName').value = cfg.brand_name || '';
-            document.getElementById('cfgDeliveryCharge').value = cfg.delivery_charge || '70';
-            document.getElementById('cfgFooterNotice').value = cfg.footer_notice || '';
-        }
-
-        async function handleSettingsUpdate(e) {
-            e.preventDefault();
-            const payload = {
-                brand_name: document.getElementById('cfgBrandName').value,
-                delivery_charge: document.getElementById('cfgDeliveryCharge').value,
-                footer_notice: document.getElementById('cfgFooterNotice').value,
-                new_password: document.getElementById('cfgNewPass').value
-            };
-            const res = await fetch('/api/admin/settings', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            if (res.ok) {
-                alert("সেটিংস সফলভাবে আপডেট হয়েছে!");
-                document.getElementById('cfgNewPass').value = '';
-            }
-        }
-
-        async function logoutAdmin() {
-            await fetch('/api/admin/logout', { method: 'POST' });
-            window.location.href = '/admin/login';
-        }
-
-        loadProducts();
-    </script>
+    <script type="module" src="./admin.js"></script>
 </body>
 </html>

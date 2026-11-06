@@ -17,6 +17,7 @@ function showTab(tabId, element) {
   if (element) element.classList.add("active");
   if (tabId === "tabProducts") loadProducts();
   if (tabId === "tabOrders") loadOrders();
+  if (tabId === "tabReviews") { loadReviewProductOptions(); loadReviews(); }
   if (tabId === "tabSettings") loadSettings();
 }
 window.showTab = showTab;
@@ -37,6 +38,7 @@ async function loadProducts() {
     return;
   }
   products = data || [];
+  populateReviewProducts();
   products.forEach((product) => {
     const row = document.createElement("tr");
     const imageCell = document.createElement("td");
@@ -85,6 +87,102 @@ async function loadProducts() {
     );
     tbody.appendChild(row);
   });
+}
+
+function populateReviewProducts() {
+  const select = byId("reviewProduct");
+  if (!select) return;
+  const selected = select.value;
+  select.replaceChildren(new Option("প্রোডাক্ট নির্বাচন করুন", ""));
+  products.forEach((product) => select.add(new Option(product.name, String(product.id))));
+  if (selected && products.some((product) => String(product.id) === selected)) select.value = selected;
+}
+
+async function loadReviewProductOptions() {
+  if (!products.length) {
+    const { data, error } = await supabase.from("products").select("id,name").order("name");
+    if (error) { console.error("Review product list failed:", error); return showMessage("প্রোডাক্ট তালিকা লোড হয়নি।"); }
+    products = data || [];
+  }
+  populateReviewProducts();
+}
+
+async function loadReviews() {
+  const tbody = byId("reviewsTableBody");
+  tbody.replaceChildren();
+  const { data, error } = await supabase.from("reviews")
+    .select("id,product_id,customer_name,rating,comment,is_approved,created_at,products(name)")
+    .order("created_at", { ascending: false }).limit(200);
+  if (error) {
+    console.error("Reviews load failed:", error);
+    showMessage("রিভিউ লোড হয়নি। Review SQL এবং Supabase policy পরীক্ষা করুন।");
+    return;
+  }
+  (data || []).forEach((review) => {
+    const row = document.createElement("tr");
+    row.appendChild(makeCell(review.products?.name || "প্রোডাক্ট ডিলিট হয়েছে"));
+    row.appendChild(makeCell(`${review.customer_name} · ${"★".repeat(Number(review.rating))}`));
+    const commentCell = makeCell(review.comment);
+    commentCell.className = "review-content";
+    row.appendChild(commentCell);
+    const statusCell = document.createElement("td");
+    const status = document.createElement("span");
+    status.className = "badge " + (review.is_approved ? "badge-done" : "badge-pending");
+    status.textContent = review.is_approved ? "প্রকাশিত" : "অনুমোদনের অপেক্ষায়";
+    statusCell.appendChild(status);
+    row.appendChild(statusCell);
+
+    const actions = document.createElement("td");
+    const approval = document.createElement("button");
+    approval.type = "button";
+    approval.className = review.is_approved ? "btn-danger" : "btn-primary";
+    approval.textContent = review.is_approved ? "লুকান" : "অনুমোদন";
+    approval.addEventListener("click", () => setReviewApproval(review.id, !review.is_approved));
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "btn-danger";
+    remove.style.marginLeft = "6px";
+    remove.textContent = "ডিলিট";
+    remove.addEventListener("click", () => deleteReview(review.id));
+    actions.append(approval, remove);
+    row.appendChild(actions);
+    tbody.appendChild(row);
+  });
+}
+
+async function handleAdminReviewCreate(event) {
+  event.preventDefault();
+  const productId = byId("reviewProduct").value;
+  const customerName = byId("reviewCustomerName").value.trim();
+  const rating = Number(byId("reviewRating").value);
+  const comment = byId("reviewComment").value.trim();
+  if (!productId || customerName.length < 2 || customerName.length > 80 || comment.length < 3 || comment.length > 1000) {
+    return showMessage("প্রোডাক্ট, সঠিক নাম, রেটিং ও ৩–১০০০ অক্ষরের মতামত দিন।");
+  }
+  const { error } = await supabase.from("reviews").insert({
+    product_id: Number(productId), customer_name: customerName, rating, comment, is_approved: true
+  });
+  if (error) {
+    console.error("Admin review insert failed:", error);
+    return showMessage("রিভিউ যোগ হয়নি। Review SQL/RLS policy পরীক্ষা করুন।");
+  }
+  byId("adminReviewForm").reset();
+  await loadReviews();
+  showMessage("রিভিউ যোগ হয়েছে এবং ওয়েবসাইটে প্রকাশিত হয়েছে।");
+}
+window.handleAdminReviewCreate = handleAdminReviewCreate;
+
+async function setReviewApproval(id, isApproved) {
+  const { error } = await supabase.from("reviews").update({ is_approved: isApproved }).eq("id", id);
+  if (error) { console.error("Review approval failed:", error); return showMessage("রিভিউয়ের অবস্থা বদলানো যায়নি।"); }
+  await loadReviews();
+}
+
+async function deleteReview(id) {
+  if (!window.confirm("এই রিভিউটি স্থায়ীভাবে ডিলিট করবেন?")) return;
+  const { error } = await supabase.from("reviews").delete().eq("id", id);
+  if (error) { console.error("Review delete failed:", error); return showMessage("রিভিউ ডিলিট হয়নি।"); }
+  await loadReviews();
 }
 
 function startProductEdit(id) {

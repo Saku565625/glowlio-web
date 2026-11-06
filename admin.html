@@ -32,6 +32,8 @@
         .badge { padding:4px 10px; border-radius:12px; font-size:11px; font-weight:600; }
         .badge-pending { background:#ffeaa7; color:#d35400; }
         .badge-done { background:#55efc4; color:#00b894; }
+        .review-content { min-width:260px; max-width:520px; white-space:pre-wrap; }
+        .table-wrap { overflow-x:auto; }
     </style>
 </head>
 <body>
@@ -41,6 +43,7 @@
             <div class="nav-link active" onclick="showTab('tabProducts', this)">📦 প্রোডাক্ট ম্যানেজমেন্ট</div>
             <div class="nav-link" onclick="showTab('tabAddProduct', this)">➕ নতুন প্রোডাক্ট যোগ</div>
             <div class="nav-link" onclick="showTab('tabOrders', this)">🛍️ গ্রাহকের অর্ডারসমূহ</div>
+            <div class="nav-link" onclick="showTab('tabReviews', this)">⭐ গ্রাহক রিভিউ</div>
             <div class="nav-link" onclick="showTab('tabSettings', this)">🎨 ওয়েবসাইট সেটিংস</div>
         </div>
         <button class="btn-danger" onclick="logoutAdmin()" style="width:100%; padding:10px;">লগআউট</button>
@@ -135,6 +138,48 @@
                     </thead>
                     <tbody id="ordersTableBody"></tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- Reviews -->
+        <div id="tabReviews" class="tab-section">
+            <div class="page-header"><h2>গ্রাহক রিভিউ যোগ ও অনুমোদন</h2></div>
+            <div class="card" style="max-width:780px;">
+                <h3 style="margin-bottom:16px;">অ্যাডমিন হিসেবে রিভিউ যোগ করুন</h3>
+                <form id="adminReviewForm" onsubmit="handleAdminReviewCreate(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>প্রোডাক্ট *</label>
+                            <select id="reviewProduct" required><option value="">প্রোডাক্ট নির্বাচন করুন</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label>গ্রাহকের নাম *</label>
+                            <input id="reviewCustomerName" required maxlength="80" placeholder="নাম">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>রেটিং *</label>
+                        <select id="reviewRating" required>
+                            <option value="5">⭐⭐⭐⭐⭐ (৫)</option><option value="4">⭐⭐⭐⭐ (৪)</option>
+                            <option value="3">⭐⭐⭐ (৩)</option><option value="2">⭐⭐ (২)</option><option value="1">⭐ (১)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>মতামত *</label>
+                        <textarea id="reviewComment" rows="3" required minlength="3" maxlength="1000" placeholder="গ্রাহকের মতামত লিখুন"></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary">রিভিউ যোগ করুন ও প্রকাশ করুন</button>
+                </form>
+            </div>
+            <div class="card">
+                <h3 style="margin-bottom:16px;">গ্রাহকদের জমা দেওয়া রিভিউ</h3>
+                <p style="margin-bottom:14px;color:#636e72;">Pending রিভিউ অনুমোদন করলে সেটি ওয়েবসাইটে দেখা যাবে।</p>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>প্রোডাক্ট</th><th>নাম ও রেটিং</th><th>মতামত</th><th>অবস্থা</th><th>অ্যাকশন</th></tr></thead>
+                        <tbody id="reviewsTableBody"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
